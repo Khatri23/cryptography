@@ -1,0 +1,4 @@
+Quantum algorithms typically leverage superposition and entanglement to perform operations on multiple possibilities simultaneously.
+This allows for exponentially faster computations in many cases.
+The O(t) complexity in quantum systems would be the result of improvements in quantum state manipulation and
+efficient quantum modular exponentiation (among other quantum tricks).

@@ -69,8 +69,17 @@ private:
 Key_transformation::Key_transformation(string text):rc(0)
 {
     words.resize(44);
-    state=key;
-    //same processs as per the consturctor in encryption using test value directly.
+    state.resize(4,std::vector<int>(4));
+    for(int i=3;i>=0;i--)
+    {
+        for(int j=3;j>=0;j--)
+        {
+            string temp;
+            temp.push_back(text.back());text.pop_back(); //as taking a first 4 bit
+            temp=text.back()+temp;text.pop_back();//total 8 bit
+            state[j][i]=std::stoi(temp,nullptr,16);
+        }
+    }
     for(int i=0;i<4;i++){ //initial words w0 .. w3
         vector<int>temp;
         for(int j=0;j<4;j++){
@@ -103,8 +112,6 @@ vector<int> Key_transformation::RoundConstant(vector<int>value)
     return result;
 }
 
-
-
 class Encryption
 {
 private:
@@ -119,7 +126,7 @@ private:
     int w;//proportional to the round
 public:
     vector<vector<int>>plaintext;
-    Encryption(string plaintext);
+    Encryption(string plaintext,string);
     string encrypt_message()
     {
         std::stringstream ss;
@@ -139,9 +146,9 @@ private:
     vector<vector<int>>MixColumn(vector<vector<int>>&,vector<vector<int>>&);
 };
 
-Encryption::Encryption(string plaintext):w(0)
+Encryption::Encryption(string plaintext,string shared_key):w(0)
 {
-    key=new Key_transformation(" ");
+    key=new Key_transformation(shared_key);
     state.resize(4,std::vector<int>(4,0));//padding with 00
         //build the state matrix.
     int index=0;
@@ -265,7 +272,7 @@ private:
         {0x0B, 0x0D, 0x09, 0x0E}
     };
 public:
-    Decryption(std::string);
+    Decryption(std::string,string);
     string decrypt_message()
     {
         std::string result;
@@ -287,8 +294,8 @@ private:
     vector<vector<int>>inv_MixColumn(vector<vector<int>>&,vector<vector<int>>&);
 };
 
-Decryption::Decryption(std::string cipher_text){
-    key=new Key_transformation(" ");
+Decryption::Decryption(std::string cipher_text,string shared_key){
+    key=new Key_transformation(shared_key);
     w=key->words.size()-1;
     state.resize(4,std::vector<int>(4));
     for(int i=3;i>=0;i--)
@@ -296,8 +303,8 @@ Decryption::Decryption(std::string cipher_text){
         for(int j=3;j>=0;j--)
         {
             string temp;
-            temp.push_back(cipher_text.back());cipher_text.pop_back(); //as taking a byte
-            temp=cipher_text.back()+temp;cipher_text.pop_back();
+            temp.push_back(cipher_text.back());cipher_text.pop_back(); //as taking a first 4 bit
+            temp=cipher_text.back()+temp;cipher_text.pop_back();//total 8 bit
             state[j][i]=std::stoi(temp,nullptr,16);
         }
     }
